@@ -9,6 +9,7 @@
     <div>
         <asp:TextBox ID="TextBox1" runat="server" Text="some text" />
         <asp:Button ID="Button1" runat="server" Text="Search" />
+        <h2>DataSource Control</h2>
         <asp:ListView ID="ListView1" runat="server" DataSourceID="ObjectDataSource1">
             <LayoutTemplate>
                 <ul>
@@ -25,6 +26,17 @@
                 <asp:QueryStringParameter QueryStringField="sort" Name="order" />
             </SelectParameters>
         </asp:ObjectDataSource>
+        <h2>Model Binding</h2>
+        <asp:ListView ID="ListView2" runat="server" SelectMethod="GetItems">
+            <LayoutTemplate>
+                <ul>
+                    <li runat="server" id="itemPlaceholder" />
+                </ul>
+            </LayoutTemplate>
+            <ItemTemplate>
+                <li><%# Eval("Id") %></li>
+            </ItemTemplate>
+        </asp:ListView>
     </div>
     </form>
 </body>

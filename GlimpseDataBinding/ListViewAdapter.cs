@@ -26,19 +26,34 @@ namespace GlimpseDataBinding
 
         protected override void OnInit(EventArgs e)
         {
-            ListView.DataBinding += ListView_DataBinding;
+			ListView.CallingDataMethods += ListView_CallingDataMethods;
+			ListView.DataBinding += ListView_DataBinding;
             base.OnInit(e);
         }
+
+		void ListView_CallingDataMethods(object sender, CallingDataMethodsEventArgs e)
+		{
+			HttpContext.Current.Items["ModelBind"] = new Dictionary<string, Tuple<Type, object>>();
+		}
 
         void ListView_DataBinding(object sender, EventArgs e)
         {
             var dataSource = ListView.DataSourceObject as ObjectDataSource;
-            Parameters = new Dictionary<string, Tuple<Type, object>>();
-            var values = dataSource.SelectParameters.GetValues(HttpContext.Current, dataSource);
-            foreach (Parameter parameter in dataSource.SelectParameters)
-            {
-                Parameters.Add(parameter.Name, Tuple.Create(parameter.GetType(), values[parameter.Name]));
-            }
+			if (dataSource != null)
+			{
+				Parameters = new Dictionary<string, Tuple<Type, object>>();
+				var values = dataSource.SelectParameters.GetValues(HttpContext.Current, dataSource);
+				foreach (Parameter parameter in dataSource.SelectParameters)
+				{
+					var name = parameter as ControlParameter != null ? ((ControlParameter)parameter).ControlID : ((QueryStringParameter)parameter).QueryStringField;
+					Parameters.Add(name, Tuple.Create(parameter.GetType(), values[parameter.Name]));
+				}
+			}
+			else
+			{
+				Parameters = (Dictionary<string, Tuple<Type, object>>)HttpContext.Current.Items["ModelBind"];
+				HttpContext.Current.Items["ModelBind"] = new Dictionary<string, Tuple<Type, object>>();
+			}
         }
 
         protected override void Render(System.Web.UI.HtmlTextWriter writer)
