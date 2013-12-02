@@ -8,13 +8,13 @@ using System.Web.UI.WebControls;
 
 namespace GlimpseDataBinding
 {
-    public class ListViewAdapter : ControlAdapter
+    public class DataBoundControlAdapter : ControlAdapter
     {
-        private ListView ListView
+        private DataBoundControl DataBoundControl
         {
             get
             {
-                return (ListView)Control;
+                return (DataBoundControl)Control;
             }
         }
 
@@ -26,25 +26,28 @@ namespace GlimpseDataBinding
 
         protected override void OnInit(EventArgs e)
         {
-            ListView.DataBinding += ListView_DataBinding;
-            ListView.DataBound += ListView_DataBound;
+            DataBoundControl.DataBinding += ListControl_DataBinding;
+            DataBoundControl.DataBound += ListControl_DataBound;
             Parameters = new Dictionary<string, Tuple<Type, object>>();
             Parameters.Add("DataBinding event fired", Tuple.Create(typeof(Boolean), (object)false));
             base.OnInit(e);
         }
 
-        void ListView_DataBinding(object sender, EventArgs e)
+        void ListControl_DataBinding(object sender, EventArgs e)
         {
             Parameters["DataBinding event fired"] = Tuple.Create(typeof(Boolean), (object)true);
-            var dataSource = ListView.DataSourceObject as ObjectDataSource;
-            var values = dataSource.SelectParameters.GetValues(HttpContext.Current, dataSource);
-            foreach (Parameter parameter in dataSource.SelectParameters)
+            var dataSource = DataBoundControl.DataSourceObject as ObjectDataSource;
+            if (dataSource != null)
             {
-                Parameters.Add(parameter.Name, Tuple.Create(parameter.GetType(), values[parameter.Name]));
+                var values = dataSource.SelectParameters.GetValues(HttpContext.Current, dataSource);
+                foreach (Parameter parameter in dataSource.SelectParameters)
+                {
+                    Parameters.Add(parameter.Name, Tuple.Create(parameter.GetType(), values[parameter.Name]));
+                }
             }
         }
 
-        void ListView_DataBound(object sender, EventArgs e)
+        void ListControl_DataBound(object sender, EventArgs e)
         {
             //not sure if there is anything useful to do here...
         }
@@ -60,25 +63,64 @@ namespace GlimpseDataBinding
                 foreach (var parameter in Parameters)
                 {
                     writer.Write("<tr><td>");
-                    writer.Write(parameter.Key);
+                    writer.WriteEncodedText(String.Format("{0}",parameter.Key));
                     writer.Write("</td><td>");
-                    writer.Write(parameter.Value.Item1);
+                    writer.WriteEncodedText(String.Format("{0}",parameter.Value.Item1));
                     writer.Write("</td><td>");
-                    writer.Write(parameter.Value.Item2);
+                    writer.WriteEncodedText(String.Format("{0}",parameter.Value.Item2));
                     writer.Write("</td></tr>");
                 }
             }
-            
-            if (this.ListView.DataSourceID != null)
+
+            if (!String.IsNullOrEmpty(this.DataBoundControl.DataSourceID))
             {
                 writer.Write("<tr><td>");
                 writer.Write("DataSourceID");
                 writer.Write("</td><td>");
                 writer.Write("string");
                 writer.Write("</td><td>");
-                writer.Write(this.ListView.DataSourceID);
+                writer.WriteEncodedText(this.DataBoundControl.DataSourceID);
                 writer.Write("</td></tr>");
             }
+
+            var lc = this.DataBoundControl as ListControl;
+
+            if (lc != null)
+            {
+                if (lc.DataSource != null)
+                {
+                    writer.Write("<tr><td>");
+                    writer.Write("DataSource");
+                    writer.Write("</td><td>");
+                    writer.Write("string");
+                    writer.Write("</td><td>");
+                    writer.WriteEncodedText(lc.DataSource.ToString());
+                    writer.Write("</td></tr>");
+                }
+                if (!String.IsNullOrEmpty(lc.DataValueField))
+                {
+                    writer.Write("<tr><td>");
+                    writer.Write("DataValueField");
+                    writer.Write("</td><td>");
+                    writer.Write("string");
+                    writer.Write("</td><td>");
+                    writer.WriteEncodedText(lc.DataValueField);
+                    writer.Write("</td></tr>");
+                }
+                if (!String.IsNullOrEmpty(lc.DataTextField))
+                {
+                    writer.Write("<tr><td>");
+                    writer.Write("DataTextField");
+                    writer.Write("</td><td>");
+                    writer.Write("string");
+                    writer.Write("</td><td>");
+                    writer.WriteEncodedText(lc.DataTextField);
+                    writer.Write("</td></tr>");
+                }
+            }
+
+                
+        
             writer.Write("</table>");
  
         }

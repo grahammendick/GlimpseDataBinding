@@ -12,13 +12,30 @@ namespace GlimpseDataBinding
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if (!Page.IsPostBack)
+            {
+                DropDownList1.DataSource = this.GetColors();
+                DropDownList1.DataTextField = "Name";
+                DropDownList1.DataValueField = "Id";
+                DropDownList1.DataBind();
+            }
         }
 
         public IEnumerable GetItems(string filter, string order)
         {
             yield return new { Id = 1 };
             yield return new { Id = 2 };
+        }
+
+        public IEnumerable GetColors()
+        {
+            yield return new { Id = "R", Name = "Red" };
+            yield return new { Id = "O", Name = "Orange" };
+            yield return new { Id = "Y", Name = "Yellow" };
+            yield return new { Id = "G", Name = "Green" };
+            yield return new { Id = "B", Name = "Blue" };
+            yield return new { Id = "I", Name = "Indigo" };
+            yield return new { Id = "V", Name = "Violet" };
         }
     }
 }

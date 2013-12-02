@@ -19,6 +19,7 @@
                 <li><%# Eval("Id") %></li>
             </ItemTemplate>
         </asp:ListView>
+        <asp:DropDownList ID="DropDownList1" runat="server"></asp:DropDownList>
         <asp:ObjectDataSource ID="ObjectDataSource1" runat="server"  SelectMethod="GetItems" TypeName="GlimpseDataBinding.Demo">
             <SelectParameters>
                 <asp:ControlParameter ControlID="TextBox1" Name="filter" />

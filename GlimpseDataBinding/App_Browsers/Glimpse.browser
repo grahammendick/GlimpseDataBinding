@@ -1,7 +1,7 @@
 ﻿<browsers>
 	<browser refID="Default">
 		<controlAdapters>
-			<adapter controlType="System.Web.UI.WebControls.ListView" adapterType="GlimpseDataBinding.ListViewAdapter, GlimpseDataBinding" />
+			<adapter controlType="System.Web.UI.WebControls.DataBoundControl" adapterType="GlimpseDataBinding.DataBoundControlAdapter, GlimpseDataBinding" />
 		</controlAdapters>
 	</browser>
 </browsers>
