@@ -9,6 +9,7 @@
     <div>
         <asp:TextBox ID="TextBox1" runat="server" Text="some text" />
         <asp:Button ID="Button1" runat="server" Text="Search" />
+        <h3>ListView bound with an ObjectDataSource:</h3>
         <asp:ListView ID="ListView1" runat="server" DataSourceID="ObjectDataSource1">
             <LayoutTemplate>
                 <ul>
@@ -19,6 +20,8 @@
                 <li><%# Eval("Id") %></li>
             </ItemTemplate>
         </asp:ListView>
+        <br />
+        <h3>DropDownList bound to a function call:</h3>
         <asp:DropDownList ID="DropDownList1" runat="server"></asp:DropDownList>
         <asp:ObjectDataSource ID="ObjectDataSource1" runat="server"  SelectMethod="GetItems" TypeName="GlimpseDataBinding.Demo">
             <SelectParameters>
