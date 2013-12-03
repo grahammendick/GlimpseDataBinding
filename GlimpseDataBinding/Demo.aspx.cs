@@ -11,11 +11,6 @@ namespace GlimpseDataBinding
 {
     public partial class Demo : System.Web.UI.Page
     {
-        protected void Page_Load(object sender, EventArgs e)
-        {
-
-        }
-
         public IEnumerable GetItems([Control("TextBox1")] string filter, [QueryString("sort")] string order)
         {
             yield return new { Id = 1 };
