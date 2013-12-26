@@ -29,6 +29,12 @@
                 <asp:QueryStringParameter QueryStringField="sort" Name="order" />
             </SelectParameters>
         </asp:ObjectDataSource>
+        <br />
+        <h3>Simple data-bound fields:</h3>
+        ID: <asp:TextBox ID="txtId" runat="server" Text="<%# bo.ID.ToString() %>" /><br />
+        Name: <asp:TextBox ID="txtName" runat="server" Text="<%# bo.name %>" /><br />
+        Is awesome?: <asp:CheckBox ID="chkHasBeenSavedToDb" Checked="<%# bo.isAwesome %>" runat="server" />
+        
     </div>
     </form>
 </body>

@@ -8,13 +8,13 @@ using System.Web.UI.WebControls;
 
 namespace GlimpseDataBinding
 {
-    public class DataBoundControlAdapter : ControlAdapter
+    public class WebControlAdapter : ControlAdapter
     {
-        private DataBoundControl DataBoundControl
+        private WebControl webControl
         {
             get
             {
-                return (DataBoundControl)Control;
+                return (WebControl)Control;
             }
         }
 
@@ -26,28 +26,48 @@ namespace GlimpseDataBinding
 
         protected override void OnInit(EventArgs e)
         {
-            DataBoundControl.DataBinding += ListControl_DataBinding;
-            DataBoundControl.DataBound += ListControl_DataBound;
+            this.webControl.DataBinding += Control_DataBinding;
+            var dbc = this.webControl as DataBoundControl;
+            if (dbc != null)
+            {
+                dbc.DataBound += Control_DataBound;
+            }
             Parameters = new Dictionary<string, Tuple<Type, object>>();
             Parameters.Add("DataBinding event fired", Tuple.Create(typeof(Boolean), (object)false));
             base.OnInit(e);
         }
 
-        void ListControl_DataBinding(object sender, EventArgs e)
+        void Control_DataBinding(object sender, EventArgs e)
         {
             Parameters["DataBinding event fired"] = Tuple.Create(typeof(Boolean), (object)true);
-            var dataSource = DataBoundControl.DataSourceObject as ObjectDataSource;
-            if (dataSource != null)
+            var dbc = this.webControl as DataBoundControl;
+            if (dbc != null)
             {
-                var values = dataSource.SelectParameters.GetValues(HttpContext.Current, dataSource);
-                foreach (Parameter parameter in dataSource.SelectParameters)
+                var dataSource = dbc.DataSourceObject as ObjectDataSource;
+                if (dataSource != null)
                 {
-                    Parameters.Add(parameter.Name, Tuple.Create(parameter.GetType(), values[parameter.Name]));
+                    var values = dataSource.SelectParameters.GetValues(HttpContext.Current, dataSource);
+                    foreach (Parameter parameter in dataSource.SelectParameters)
+                    {
+                        Parameters.Add(parameter.Name, Tuple.Create(parameter.GetType(), values[parameter.Name]));
+                    }
                 }
             }
+            string message = "Value at data bind:";
+            if (sender is TextBox)
+            {
+                var textBox = sender as TextBox;
+                Parameters.Add(message, Tuple.Create(typeof(String), (object)textBox.Text));
+            }
+            else if (sender is CheckBox)
+            {
+                var checkBox = sender as CheckBox;
+                Parameters.Add(message, Tuple.Create(typeof(Boolean), (object)checkBox.Checked));
+            }
+            
         }
 
-        void ListControl_DataBound(object sender, EventArgs e)
+        void Control_DataBound(object sender, EventArgs e)
         {
             //not sure if there is anything useful to do here...
         }
@@ -72,18 +92,20 @@ namespace GlimpseDataBinding
                 }
             }
 
-            if (!String.IsNullOrEmpty(this.DataBoundControl.DataSourceID))
+            var dbc = this.webControl as DataBoundControl;
+
+            if (dbc != null && !String.IsNullOrEmpty(dbc.DataSourceID))
             {
                 writer.Write("<tr><td>");
                 writer.Write("DataSourceID");
                 writer.Write("</td><td>");
                 writer.Write("string");
                 writer.Write("</td><td>");
-                writer.WriteEncodedText(this.DataBoundControl.DataSourceID);
+                writer.WriteEncodedText(dbc.DataSourceID);
                 writer.Write("</td></tr>");
             }
 
-            var lc = this.DataBoundControl as ListControl;
+            var lc = dbc as ListControl;
 
             if (lc != null)
             {

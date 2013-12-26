@@ -8,8 +8,14 @@ using System.Web.UI.WebControls;
 
 namespace GlimpseDataBinding
 {
+
+
+
     public partial class Demo : System.Web.UI.Page
     {
+
+        public BusinessObject bo;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!Page.IsPostBack)
@@ -18,6 +24,11 @@ namespace GlimpseDataBinding
                 DropDownList1.DataTextField = "Name";
                 DropDownList1.DataValueField = "Id";
                 DropDownList1.DataBind();
+
+                bo = new BusinessObject();
+                txtId.DataBind();
+                txtName.DataBind();
+                chkHasBeenSavedToDb.DataBind();
             }
         }
 
@@ -36,6 +47,21 @@ namespace GlimpseDataBinding
             yield return new { Id = "B", Name = "Blue" };
             yield return new { Id = "I", Name = "Indigo" };
             yield return new { Id = "V", Name = "Violet" };
+        }
+    }
+
+
+    public class BusinessObject
+    {
+        public int ID { get; set; }
+        public string name { get; set; }
+        public bool isAwesome { get; set; }
+
+        public BusinessObject()
+        {
+            this.ID = 555;
+            this.name = "Test object 555";
+            this.isAwesome = true;
         }
     }
 }
