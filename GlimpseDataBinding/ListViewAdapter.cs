@@ -18,11 +18,14 @@ namespace GlimpseDataBinding
             }
         }
 
-        private Dictionary<string, Tuple<Type, object>> Parameters
-        {
-            get;
-            set;
-        }
+		private Dictionary<string, List<List<DataBindParameter>>> DataBindInfo
+		{
+			get
+			{
+				return (Dictionary<string, List<List<DataBindParameter>>>) HttpContext.Current.Items["DataBindInfo"];
+			}
+		}
+
 
         protected override void OnInit(EventArgs e)
         {
@@ -33,46 +36,59 @@ namespace GlimpseDataBinding
 
 		void ListView_CallingDataMethods(object sender, CallingDataMethodsEventArgs e)
 		{
-			HttpContext.Current.Items["ModelBind"] = new Dictionary<string, Tuple<Type, object>>();
+			HttpContext.Current.Items["ModelBind"] = new List<DataBindParameter>();
 		}
 
         void ListView_DataBinding(object sender, EventArgs e)
         {
             var dataSource = ListView.DataSourceObject as ObjectDataSource;
+			List<DataBindParameter> parameters = null;
 			if (dataSource != null)
 			{
-				Parameters = new Dictionary<string, Tuple<Type, object>>();
+				parameters = new List<DataBindParameter>();
 				var values = dataSource.SelectParameters.GetValues(HttpContext.Current, dataSource);
 				foreach (Parameter parameter in dataSource.SelectParameters)
 				{
 					var name = parameter as ControlParameter != null ? ((ControlParameter)parameter).ControlID : ((QueryStringParameter)parameter).QueryStringField;
-					Parameters.Add(name, Tuple.Create(parameter.GetType(), values[parameter.Name]));
+					parameters.Add(new DataBindParameter(name, parameter.GetType(), values[parameter.Name]));
 				}
 			}
 			else
 			{
-				Parameters = (Dictionary<string, Tuple<Type, object>>)HttpContext.Current.Items["ModelBind"];
-				HttpContext.Current.Items["ModelBind"] = new Dictionary<string, Tuple<Type, object>>();
+				parameters = (List<DataBindParameter>)HttpContext.Current.Items["ModelBind"];
+				HttpContext.Current.Items["ModelBind"] = new List<DataBindParameter>();
 			}
+			if (!DataBindInfo.ContainsKey(ListView.UniqueID))
+				DataBindInfo[ListView.UniqueID] = new List<List<DataBindParameter>>();
+			DataBindInfo[ListView.UniqueID].Add(parameters);
         }
 
         protected override void Render(System.Web.UI.HtmlTextWriter writer)
         {
             base.Render(writer);
-            if (Parameters != null)
-            {
+			if (DataBindInfo.ContainsKey(ListView.UniqueID))
+			{
                 writer.AddAttribute(HtmlTextWriterAttribute.Border, "1px");
                 writer.Write("<table border=1px><tr><th>Name</th><th>Type</th><th>Value</th></tr>");
-                foreach (var parameter in Parameters)
-                {
-                    writer.Write("<tr><td>");
-                    writer.Write(parameter.Key);
-                    writer.Write("</td><td>");
-                    writer.Write(parameter.Value.Item1);
-                    writer.Write("</td><td>");
-                    writer.Write(parameter.Value.Item2);
-                    writer.Write("</td></tr>");
-                }
+				var parameterList = DataBindInfo[ListView.UniqueID];
+				var i = 0;
+				foreach (var parameters in parameterList)
+				{
+					writer.Write("<th colspan=\"3\">");
+					writer.Write("Data Bind " + i);
+					writer.Write("</th>");
+					foreach (var parameter in parameters)
+					{
+						writer.Write("<tr><td>");
+						writer.Write(parameter.Name);
+						writer.Write("</td><td>");
+						writer.Write(parameter.Type);
+						writer.Write("</td><td>");
+						writer.Write(parameter.Value);
+						writer.Write("</td></tr>");
+					}
+					i++;
+				}
                 writer.Write("</table>");
             }
         }

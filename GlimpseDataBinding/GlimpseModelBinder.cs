@@ -13,8 +13,8 @@ namespace GlimpseDataBinding
 			var success = base.BindModel(modelBindingExecutionContext, bindingContext);
 			if (success)
 			{
-				var parms = (Dictionary<string, Tuple<Type, object>>)HttpContext.Current.Items["ModelBind"];
-				parms.Add(bindingContext.ModelName, Tuple.Create(bindingContext.ValueProvider.GetType(), (object) bindingContext.ModelState[bindingContext.ModelName].Value.AttemptedValue));
+				var parms = (List<DataBindParameter>)HttpContext.Current.Items["ModelBind"];
+				parms.Add(new DataBindParameter(bindingContext.ModelName, bindingContext.ValueProvider.GetType(), (object) bindingContext.ModelState[bindingContext.ModelName].Value.AttemptedValue));
 			}
 			return success;
 		}
